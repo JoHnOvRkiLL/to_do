@@ -1,16 +1,49 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, FlatList, Button } from 'react-native';
+import GoalList from './components/GoalList';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
+  const [goalList, setGoalList] = React.useState([]);
+  const [isModalVisible , setIsModalVisible] = React.useState(false);
+
+  function startAddingGoal(){
+    setIsModalVisible(true);
+  };
+
+  function endAddingGoal(){
+    setIsModalVisible(false);
+  };
+
+  function onAddHandler(enteredGoal){
+   setGoalList(prevGoalList => 
+    [
+      ...prevGoalList,
+      {text : enteredGoal, key : Math.random().toString() },
+    ]);
+    endAddingGoal();
+  };
+
+  function deleteGoalHandler(key){
+    setGoalList(prevGoalList => {
+      return prevGoalList.filter((goal) => goal.key !== key);
+    });
+  };
+
   return (
     <View style={styles.appContainer}>
-      <Text>My 2025 Goals</Text>
-        <View style = {styles.inputContainer}>
-          <TextInput style={styles.textInput} placeholder='e.g. Learn Guitar'/>
-          <Button title='Add Goal'/>
-        </View>
+      <Button title='Add New Goal' color="#5e0acc" onPress={startAddingGoal}/>
+      <GoalInput onAdd={onAddHandler} showModal = {isModalVisible} cancelModal={endAddingGoal}/>
         <View style={styles.goalsContainer}>
-          <Text>Your 2025 Goals</Text>
+          <FlatList 
+            alwaysBounceVertical = {true}
+            data={goalList} 
+            renderItem={itemData => {
+              return <GoalList
+                text={itemData.item.text}
+                id = {itemData.item.key}
+                onDeleteItem={deleteGoalHandler}/>
+            }}/>
         </View>
     </View>
   );
@@ -19,25 +52,9 @@ export default function App() {
 const styles = StyleSheet.create({
   appContainer: {
     flex:1,
-    paddingTop: 50,
+    paddingTop: 60,
     paddingHorizontal:16, 
-  },
-  inputContainer: {
-    flex:1,
-    flexDirection:'row',
-    justifyContent: 'space-between',
-    alignItems : 'center',
-    marginBottom : 20,
-    borderBottomWidth: 2,
-    borderColor : '#CCCCCC',
-  },
-  textInput : {
-    width : '75%',
-    padding: 8,
-    borderStyle : 'solid',
-    borderWidth : 2,
-    borderColor :'#CCCCCC',
-    borderRadius : 10,
+    backgroundColor: '#322C2B',
   },
   goalsContainer : {
     flex : 6 ,
